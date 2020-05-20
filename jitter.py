@@ -55,7 +55,7 @@ def analyse(body, start_time):
 		if next_icmp == (icmp_seq + 1):
 			jitter.append((timestamp, icmp_seq, abs(next_ping - ping)))
 
-	return pings, missed, jitter
+	return pings, jitter, missed
 
 
 def main():
@@ -112,7 +112,7 @@ def main():
 			body.append(line)
 
 			if (i+1) % args.dump_freq == 0:
-				pings, missed, jitter = analyse(body, start_time)
+				pings, jitter, missed = analyse(body, start_time)
 				
 				if args.verbose:
 					msg = "Saving data to {} after {} pings.".format(args.save_path, i+1)
@@ -127,7 +127,7 @@ def main():
 		else:
 			stats.append(line)
 
-	pings, missed, jitter = analyse(body, start_time)
+	pings, jitter, missed = analyse(body, start_time)
 
 	if args.verbose:
 		print("Saving final data to {}.".format(args.save_path))
