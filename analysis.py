@@ -16,6 +16,7 @@
 # +
 import numpy as np
 import pickle
+import os
 
 import datetime
 import matplotlib.dates as mdates
@@ -102,8 +103,11 @@ def plot(filename, span, tolerance):
 
 
 # +
+filename = "/Users/egrefen/Desktop/jitter/jitter_200520_10h02.pkl"
+span = widgets.BoundedIntText(10, min=1)
+span = widgets.BoundedIntText(10, min=1)
 
-interactive(plot, filename="/Users/egrefen/Desktop/jitter/jitter_200520_10h02.pkl", span=10, tolerance=30)
+interactive(plot, filename=filename, span=span, tolerance=tolerance)
 # -
 
 
