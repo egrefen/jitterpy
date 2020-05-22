@@ -25,28 +25,21 @@ parser.add_argument('save_path', type=str, default=None, nargs='?', help='where 
 
 args = parser.parse_args()
 
-
-def parse_time(timestamp, start_time):
-	h, m, s = map(int, timestamp.split('.')[0].split(':'))
-	if h < start_time.hour:
-		delta = datetime.timedelta(days=1)
-	else:
-		delta = datetime.timedelta(days=0)
-	timestamp = datetime.datetime(start_time.year, start_time.month, start_time.day, h , m, s) + delta
-	return timestamp
-
-
-def line_parser(line, start_time):
-	parts = line.split()
-	timestamp = parse_time(parts[0], start_time)
-	icmp_seq = int(parts[5].split('=')[1])
-	ping = float(parts[7].split('=')[1])
-	return timestamp, icmp_seq, ping
-
-
-def analyse(body, start_time):
+def analyse(body, reference_date):
 	missed = [int(line.split()[-1]) for line in body if line.startswith("Request timeout")]
-	pings = [line_parser(line, start_time) for line in body if line and not line.startswith("Request timeout")]
+
+	pinglines = [line for line in body if line and not line.startswith("Request timeout")]
+	pings = []
+	for line in pinglines:
+		parts = line.split()
+		h, m, s = map(int, parts[0].split('.')[0].split(':'))
+		timestamp = datetime.datetime(reference_date.year, reference_date.month, reference_date.day, h , m, s)
+		if (timestamp - reference_date).total_seconds() < 0:
+			timestamp = timestamp + datetime.timedelta(days=1)
+			reference_date = timestamp
+		icmp_seq = int(parts[5].split('=')[1])
+		ping = float(parts[7].split('=')[1])
+		pings.append((timestamp, icmp_seq, ping))
 
 	jitter = []
 	for i in range(len(pings)-1):
